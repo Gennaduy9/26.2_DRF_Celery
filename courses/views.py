@@ -1,4 +1,3 @@
-from celery.beat import logger
 from django.http import Http404
 from rest_framework import viewsets, generics, serializers
 from rest_framework.generics import get_object_or_404
@@ -19,35 +18,27 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     pagination_class = CoursePaginator
 
-    # permission_classes = [AllowAny]
-
     def get_permissions(self):
         # Возвращает соответствующие разрешения в зависимости от действия.
         if self.action == 'create':
             self.permission_classes = [IsAuthenticated | IsModerator]
         elif self.action == 'destroy':
             self.permission_classes = [IsAuthenticated, IsSuperuser]
-        # elif self.action == 'update':
-        #     self.permission_classes = [IsAuthenticated, IsSuperuser]
+        elif self.action == 'update':
+            self.permission_classes = [IsAuthenticated, IsSuperuser]
         elif self.action == 'retrieve':
             self.permission_classes = [IsAuthenticated, IsSuperuser | IsOwnerOrStaff | IsModerator]
         else:
             self.action = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
 
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         instance = self.get_object()
-        print(instance.name)
-
         subscribed_users = instance.get_subscribed_users()
-        # user_email = 'myparents2@yandex.ru'
         # Отправляем уведомление каждому пользователю
         for user in subscribed_users:
             if user.email:
-                try:
-                    send_mail_about_updates.delay(recipient_email=user.email, course_name=instance.name)
-                except Exception as emails:
-                    logger.error(f"Не удалось отправить электронное письмо на адрес {user.email}: {emails}")
+                send_mail_about_updates.delay(user.email, instance.name)
 
         return super().update(request, *args, **kwargs)
 
@@ -57,7 +48,7 @@ class SubscriptionAPIView(APIView):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         user = self.request.user
         user_data = UserSerializer(user).data
 
@@ -93,3 +84,39 @@ class CoursePaymentApiView(generics.CreateAPIView):
         payment_link = get_session(paid_of_course)
         paid_of_course.payment_link = payment_link
         paid_of_course.save()
+
+
+# class NewsletterUpdateCourseAPIView(APIView):
+#     queryset = Course.objects.all()
+#     serializer_class = CourseSerializer
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request):
+#         course = get_object_or_404(Course, pk=request.data.get("course"))
+#         user = self.request.user
+#
+#         if not Course.objects.filter(subscriptions=user).exists():
+#             course.subscriptions.add(user)
+#             message = f'{user.email} {course.name} обновлен!'
+#             send_mail_about_updates.delay(message, course.owner.email)
+#         else:
+#             course.subscriptions.remove(user)
+#             message = f'{user.email} удалил {course.name}!'
+#         return Response({'message': message})
+
+    # def patch(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     subscribed_users = instance.get_subscribed_users()
+    #     print(subscribed_users)
+    #
+    #     # Проверка на последнее обновление курса
+    #     if (timezone.now() - instance.last_updated).total_seconds() > 4 * 3600:
+    #         # Отправляем уведомление каждому пользователю
+    #         for user in subscribed_users:
+    #             if user.email:
+    #                 try:
+    #                     send_mail_about_updates.delay(recipient_email=user.email, course_name=instance.name)
+    #                 except Exception as emails:
+    #                     logger.error(f"Не удалось отправить электронное письмо на адрес {user.email}: {emails}")
+    #
+    #     return super().update(request, *args, **kwargs)
