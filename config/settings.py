@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "drf_yasg",
+    "django_celery_beat",
 
     "users.apps.UsersConfig",
     "courses.apps.CoursesConfig",
@@ -169,3 +170,33 @@ SWAGGER_SETTINGS = {
 }
 
 STRIPE_SECRET_API_KEY = os.getenv("STRIPE_API_KEY")
+
+# URL-адрес брокера сообщений
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+
+# Настройки для Celery
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'courses.tasks.send_mail_about_updates',
+        'schedule': timedelta(minutes=1),
+    },
+}
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/New_York'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+EMAIL_HOST_USER = 'myparents2@yandex.ru'
+EMAIL_HOST_PASSWORD = 'jcjvjpojuzgcapqo'

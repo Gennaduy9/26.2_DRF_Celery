@@ -16,14 +16,17 @@ class Course(models.Model):
     def __str__(self):
         return self.name
 
+    def get_subscribed_users(self):
+        return [subscription.user for subscription in self.subscriptions.all() if subscription.user is not None]
+
     class Meta:
         verbose_name = 'Курс'
         verbose_name_plural = 'Курсы'
 
 
 class CourseSubscription(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс')
-    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='Пользователь')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subscriptions', verbose_name='Курс')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='Пользователь', null=True)
 
     def __str__(self):
         return f"{self.user} {self.course}"

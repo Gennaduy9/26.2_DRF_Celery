@@ -1,3 +1,4 @@
+from celery.beat import logger
 from django.http import Http404
 from rest_framework import viewsets, generics, serializers
 from rest_framework.generics import get_object_or_404
@@ -8,11 +9,9 @@ from courses.models import Course, CourseSubscription, CoursePayment
 from courses.paginators import CoursePaginator
 from courses.serilzers import CourseSerializer, CoursePaymentSerializer
 from courses.services import get_session
-# from courses.services import create_stripe_price, create_stripe_session
 from lessons.permissions import IsSuperuser, IsOwnerOrStaff, IsModerator
-from users.models import Payment
 from users.serilzers import UserSerializer
-
+from courses.tasks import send_mail_about_updates
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -20,26 +19,37 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     pagination_class = CoursePaginator
 
+    # permission_classes = [AllowAny]
+
     def get_permissions(self):
         # Возвращает соответствующие разрешения в зависимости от действия.
         if self.action == 'create':
             self.permission_classes = [IsAuthenticated | IsModerator]
         elif self.action == 'destroy':
             self.permission_classes = [IsAuthenticated, IsSuperuser]
-        elif self.action == 'update':
-            self.permission_classes = [IsAuthenticated, IsSuperuser]
+        # elif self.action == 'update':
+        #     self.permission_classes = [IsAuthenticated, IsSuperuser]
         elif self.action == 'retrieve':
             self.permission_classes = [IsAuthenticated, IsSuperuser | IsOwnerOrStaff | IsModerator]
         else:
             self.action = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
 
-    # def retrieve(self, request, pk=None):
-    #
-    #     queryset = Course.objects.all()
-    #     user = get_object_or_404(queryset, pk=pk)
-    #     serializer = CourseSerializer(user)
-    #     return Response(serializer.data)
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        print(instance.name)
+
+        subscribed_users = instance.get_subscribed_users()
+        # user_email = 'myparents2@yandex.ru'
+        # Отправляем уведомление каждому пользователю
+        for user in subscribed_users:
+            if user.email:
+                try:
+                    send_mail_about_updates.delay(recipient_email=user.email, course_name=instance.name)
+                except Exception as emails:
+                    logger.error(f"Не удалось отправить электронное письмо на адрес {user.email}: {emails}")
+
+        return super().update(request, *args, **kwargs)
 
 
 class SubscriptionAPIView(APIView):
@@ -83,17 +93,3 @@ class CoursePaymentApiView(generics.CreateAPIView):
         payment_link = get_session(paid_of_course)
         paid_of_course.payment_link = payment_link
         paid_of_course.save()
-
-# class CoursePaymentApiView(generics.CreateAPIView):
-#     queryset = Payment.objects.all()
-#     serializer_class = CoursePaymentSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#     def perform_create(self, serializer):
-#         course = serializer.validated_data.get('name')
-#         if not course:
-#             raise serializers.ValidationError('Укажите курс')
-#         payment = serializer.save()
-#         stripe_price_id = create_stripe_price(payment)
-#         payment.payment_link, payment.payment_id = create_stripe_session(stripe_price_id)
-#         payment.save()

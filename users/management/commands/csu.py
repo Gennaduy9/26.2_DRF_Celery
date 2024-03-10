@@ -36,3 +36,15 @@ class Command(BaseCommand):
 
         user2.set_password('user2')
         user2.save()
+
+        user3 = User.objects.create(
+            email='myparents2@yandex.ru',
+            first_name='Test1',
+            last_name='Test2',
+            is_active=True,
+            is_staff=True,
+            is_superuser=False
+        )
+
+        user3.set_password('123qwe456rty')
+        user3.save()
