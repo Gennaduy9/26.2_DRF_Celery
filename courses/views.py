@@ -1,6 +1,5 @@
 from django.http import Http404
-from rest_framework import viewsets, generics, serializers
-from rest_framework.generics import get_object_or_404
+from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -32,13 +31,13 @@ class CourseViewSet(viewsets.ModelViewSet):
             self.action = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
 
-    def patch(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
         subscribed_users = instance.get_subscribed_users()
-        # Отправляем уведомление каждому пользователю
+        # Отправляем уведомление каждому подписанному пользователю
         for user in subscribed_users:
             if user.email:
-                send_mail_about_updates.delay(user.email, instance.name)
+                send_mail_about_updates.delay(instance.name, user.email)
 
         return super().update(request, *args, **kwargs)
 
@@ -84,39 +83,3 @@ class CoursePaymentApiView(generics.CreateAPIView):
         payment_link = get_session(paid_of_course)
         paid_of_course.payment_link = payment_link
         paid_of_course.save()
-
-
-# class NewsletterUpdateCourseAPIView(APIView):
-#     queryset = Course.objects.all()
-#     serializer_class = CourseSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#     def post(self, request):
-#         course = get_object_or_404(Course, pk=request.data.get("course"))
-#         user = self.request.user
-#
-#         if not Course.objects.filter(subscriptions=user).exists():
-#             course.subscriptions.add(user)
-#             message = f'{user.email} {course.name} обновлен!'
-#             send_mail_about_updates.delay(message, course.owner.email)
-#         else:
-#             course.subscriptions.remove(user)
-#             message = f'{user.email} удалил {course.name}!'
-#         return Response({'message': message})
-
-    # def patch(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     subscribed_users = instance.get_subscribed_users()
-    #     print(subscribed_users)
-    #
-    #     # Проверка на последнее обновление курса
-    #     if (timezone.now() - instance.last_updated).total_seconds() > 4 * 3600:
-    #         # Отправляем уведомление каждому пользователю
-    #         for user in subscribed_users:
-    #             if user.email:
-    #                 try:
-    #                     send_mail_about_updates.delay(recipient_email=user.email, course_name=instance.name)
-    #                 except Exception as emails:
-    #                     logger.error(f"Не удалось отправить электронное письмо на адрес {user.email}: {emails}")
-    #
-    #     return super().update(request, *args, **kwargs)

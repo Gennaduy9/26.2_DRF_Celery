@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from datetime import timedelta
 
 
-@shared_task()
+@shared_task
 def check_last_data():
     '''
     Это скрипт, который проверяет последние дата входа пользователя и то,

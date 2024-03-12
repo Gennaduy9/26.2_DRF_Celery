@@ -10,8 +10,6 @@ from lessons.validators import UrlLinkCheckValidator
 class CourseSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
-    #link_of_payment = serializers.URLField()
-
     # Cоздание поля для подсчёта уроков
     lesson_count = SerializerMethodField()
 
@@ -30,7 +28,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ["name", "preview_image", "description", "lesson_count", "owner", "is_subscribed"]
+        fields = ["id", "name", "preview_image", "description", "lesson_count", "owner", "is_subscribed"]
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

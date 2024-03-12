@@ -10,14 +10,16 @@ class Course(models.Model):
     preview_image = models.ImageField(upload_to='course_previews/', verbose_name='Изображение', **NULLABLE)
     description = models.TextField(**NULLABLE, verbose_name='Описание')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, verbose_name='Владелец',
-                                   **NULLABLE)
+                              **NULLABLE)
     price = models.PositiveIntegerField(null=True, verbose_name='Цена')
 
     def __str__(self):
         return self.name
 
     def get_subscribed_users(self):
-        return [subscription.user for subscription in self.subscriptions.all() if subscription.user is not None]
+        subscription_user = [subscription.user for subscription in self.subscriptions.all() if
+                             subscription.user is not None]
+        return subscription_user
 
     class Meta:
         verbose_name = 'Курс'
