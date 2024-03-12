@@ -1,0 +1,125 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$p7sBGX7WVoOXWQ3R3YuzVO$FUhWWGlhR4ezCWFnPnDgxVISTMkTLSilSFSY4l/xZM8=",
+      "last_login": "2024-03-09T17:21:52.475Z",
+      "is_superuser": true,
+      "first_name": "Admin",
+      "last_name": "SkyPro",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2024-03-09T17:19:45.425Z",
+      "email": "admin@mail.com",
+      "phone": null,
+      "avatar": "",
+      "country": null,
+      "role": "member",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$GJ2suVgQx2FXYy1d0ySU0m$YMFU/UrygIt9tlPOO46XyXsCy4nPzQ939ryAr7SsnjI=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-03-09T17:19:45.685Z",
+      "email": "user1@sky.com",
+      "phone": null,
+      "avatar": "",
+      "country": null,
+      "role": "member",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$iv63kueTxaASudHcrdgLQQ$5Sxs2LxyIxrsQ1FFz87oN+Tt0FPCnOz7Rabkf2GTdvw=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-03-09T17:19:45.882Z",
+      "email": "user2@sky.com",
+      "phone": null,
+      "avatar": "",
+      "country": null,
+      "role": "member",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "pay_date": "2024-03-09",
+      "pay_course": 1,
+      "pay_lesson": 1,
+      "money": 10,
+      "pay_method": "transfer"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 2,
+    "fields": {
+      "user": 1,
+      "pay_date": "2024-03-09",
+      "pay_course": 2,
+      "pay_lesson": 2,
+      "money": 10,
+      "pay_method": "transfer"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 3,
+    "fields": {
+      "user": 2,
+      "pay_date": "2024-03-09",
+      "pay_course": 3,
+      "pay_lesson": 3,
+      "money": 10,
+      "pay_method": "cash"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 4,
+    "fields": {
+      "user": 3,
+      "pay_date": "2024-03-09",
+      "pay_course": 4,
+      "pay_lesson": 4,
+      "money": 10,
+      "pay_method": "cash"
+    }
+  },
+  {
+    "model": "users.payment",
+    "pk": 5,
+    "fields": {
+      "user": 2,
+      "pay_date": "2024-03-09",
+      "pay_course": 5,
+      "pay_lesson": 5,
+      "money": 10,
+      "pay_method": "cash"
+    }
+  }
+]
